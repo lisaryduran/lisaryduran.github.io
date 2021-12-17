@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>p5.js example</title>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+  <script src="assets/js/p5.js"></script>
+  <!-- <script src="../addons/p5.sound.js"></script> -->
+  <script>
+    let numBalls = 13;
+    let num = 13;
+    let over = false;
+    let spring = 0.05;
+    let gravity = 0.03;
+    let friction = -0.9;
+    let balls = [];
+    let font,
+    fontsize = 40;
+    function preload() {
+      // Ensure the .ttf or .otf font stored in the assets directory
+      // is loaded before setup() and draw() are called
+      font = loadFont('assets/fonts/SourceSansPro-Black.ttf');
+    }
+
+    function setup() {
+      createCanvas(720, 400);
+      for (let i = 0; i < numBalls; i++) {
+        balls[i] = new Ball(
+          random(width),
+          random(height),
+          random(30, 70),
+          i,
+          balls
+          );
+      }
+      //noStroke();
+      //fill(255, 204);
+      textFont(font);
+      textSize(fontsize);
+      textAlign(CENTER, CENTER)
+    }
+
+    function draw() {
+      background(0);
+   
+
+      // Align the text to the left
+      // and run drawWords() in the right third of the canvas
+      textAlign(LEFT);
+      drawWords(width * 0.65);
+      balls.forEach(ball => {
+        ball.collide();
+        ball.move();
+        //ball.update();  
+        ball.display();
+      });
+    }
+
+    function mousePressed() {
+      for (let i = 0; i < balls.length; i++) {
+        balls[i].clicked(mouseX, mouseY);
+      }
+    }
+
+    function drawWords(x) {
+        // The text() function needs three parameters:
+        // the text to draw, the horizontal position,
+        // and the vertical position
+         
+
+        fill(255);
+        text('Sunshine', x, 350);
+    }
+
+    class Ball {
+      constructor(xin, yin, din, idin, oin) {
+        this.x = xin;
+        this.y = yin;
+        this.vx = 0;
+        this.vy = 0;
+        this.diameter = din;
+        this.id = idin;
+        this.others = oin;
+        this.brightness = 0;
+      }
+      collide() {
+          for (let i = this.id + 1; i < numBalls; i++)
+          {
+            // console.log(others[i]);
+            let dx = this.others[i].x - this.x;
+            let dy = this.others[i].y - this.y;
+            let distance = sqrt(dx * dx + dy * dy);
+            let minDist = this.others[i].diameter / 2 + this.diameter / 2;
+            //   console.log(distance);
+            //console.log(minDist);
+            if (distance < minDist) {
+              //console.log("2");
+              let angle = atan2(dy, dx);
+              let targetX = this.x + cos(angle) * minDist;
+              let targetY = this.y + sin(angle) * minDist;
+              let ax = (targetX - this.others[i].x) * spring;
+              let ay = (targetY - this.others[i].y) * spring;
+              this.vx -= ax;
+              this.vy -= ay;
+              this.others[i].vx += ax;
+              this.others[i].vy += ay;
+            }
+          }
+      }
+
+      move()
+      {
+        this.vy += gravity;
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x + this.diameter / 2 > width) {
+          this.x = width - this.diameter / 2;
+          this.vx *= friction;
+        } else if (this.x - this.diameter / 2 < 0) {
+          this.x = this.diameter / 2;
+          this.vx *= friction;
+        }
+        if (this.y + this.diameter / 2 > height) {
+          this.y = height - this.diameter / 2;
+          this.vy *= friction;
+        } else if (this.y - this.diameter / 2 < 0) {
+          this.y = this.diameter / 2;
+          this.vy *= friction;
+        }
+      }
+      
+      display() {
+        stroke(255);
+        strokeWeight(4);
+        fill(125);
+        fill(this.brightness, 125);
+        //ellipse(this.x, this.y, this.r * 2);
+        ellipse(this.x, this.y, this.diameter, this.diameter);
+      }
+      // Make sure no other bubbles are active
+      otherOver() {
+          for (let i = 0; i < num; i++) {
+            if (i == this.id) {
+               
+            }
+          }
+        return false;
+      }
+      clicked(px, py) {
+          let d = dist(px, py, this.x, this.y);
+          console.log('clicked');
+          if (d < this.diameter) {
+            console.log('clicked checked');
+            this.brightness = color(255, 165, 0);
+          }
+      }    
+    }
+  </script>
+</head>
+
+<body>
+  <main>
+  </main>
+</body>
+</html>
